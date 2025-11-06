@@ -227,5 +227,43 @@ ALL_TOOLS = [
             },
             "required": ["code", "label"]
         }
+    },
+    # COMPTES GÉNÉRAUX (LEDGER ACCOUNTS)
+    {
+        "name": "pennylane_list_ledger_accounts",
+        "description": "Liste tous les comptes généraux",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "limit": {"type": "integer", "description": "Nombre de résultats", "default": 20},
+                "page": {"type": "integer", "description": "Numéro de page", "default": 1},
+                "filter": {"type": "string", "description": "Filtres (id, number, enabled)"}
+            }
+        }
+    },
+    {
+        "name": "pennylane_get_ledger_account",
+        "description": "Récupère un compte général par son ID",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "account_id": {"type": "integer", "description": "ID du compte"}
+            },
+            "required": ["account_id"]
+        }
+    },
+    {
+        "name": "pennylane_create_ledger_account",
+        "description": "Crée un nouveau compte général. Si le numéro commence par 401 ou 411, un fournisseur/client sera aussi créé",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "number": {"type": "string", "description": "Numéro du compte (ex: 401, 411)"},
+                "label": {"type": "string", "description": "Libellé du compte"},
+                "vat_rate": {"type": "string", "description": "Taux de TVA (ex: FR_200, FR_1_75)"},
+                "country_alpha2": {"type": "string", "description": "Code pays (ex: FR)"}
+            },
+            "required": ["number", "label"]
+        }
     }
 ]
