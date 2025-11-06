@@ -238,6 +238,28 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> str:
         elif name == "pennylane_update_ledger_entry":
             result = await journals.update_ledger_entry(pennylane_client, **arguments)
         
+        # LIGNES D'ÉCRITURE
+        elif name == "pennylane_list_all_ledger_entry_lines":
+            result = await journals.list_all_ledger_entry_lines(pennylane_client, **arguments)
+        elif name == "pennylane_get_ledger_entry_line":
+            result = await journals.get_ledger_entry_line(pennylane_client, arguments["line_id"])
+        elif name == "pennylane_list_lettered_ledger_entry_lines":
+            result = await journals.list_lettered_ledger_entry_lines(pennylane_client, arguments["line_id"],
+                                                                     limit=arguments.get("limit", 20),
+                                                                     page=arguments.get("page", 1))
+        elif name == "pennylane_list_ledger_entry_line_categories":
+            result = await journals.list_ledger_entry_line_categories(pennylane_client, arguments["line_id"],
+                                                                      limit=arguments.get("limit", 20),
+                                                                      page=arguments.get("page", 1))
+        elif name == "pennylane_link_categories_to_ledger_entry_line":
+            result = await journals.link_categories_to_ledger_entry_line(pennylane_client, arguments["line_id"], arguments["categories"])
+        elif name == "pennylane_letter_ledger_entry_lines":
+            result = await journals.letter_ledger_entry_lines(pennylane_client, arguments["ledger_entry_lines"],
+                                                             arguments.get("unbalanced_lettering_strategy", "none"))
+        elif name == "pennylane_unletter_ledger_entry_lines":
+            result = await journals.unletter_ledger_entry_lines(pennylane_client, arguments["ledger_entry_lines"],
+                                                               arguments.get("unbalanced_lettering_strategy", "none"))
+        
         else:
             return json.dumps({"error": f"Unknown tool: {name}"})
         

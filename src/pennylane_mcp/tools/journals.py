@@ -216,3 +216,107 @@ async def update_ledger_entry(
         data["currency"] = currency
     
     return await client.put(f"/ledger_entries/{ledger_entry_id}", json=data)
+
+
+async def list_all_ledger_entry_lines(
+    client: PennylaneClient,
+    limit: int = 20,
+    cursor: str | None = None,
+    filter_query: str | None = None,
+    sort: str = "id"
+) -> dict[str, Any]:
+    """Liste toutes les lignes d'écriture."""
+    params = {
+        "limit": limit,
+        "sort": sort,
+    }
+    
+    if cursor:
+        params["cursor"] = cursor
+    if filter_query:
+        params["filter"] = filter_query
+    
+    return await client.get("/ledger_entry_lines", params=params)
+
+
+async def get_ledger_entry_line(client: PennylaneClient, line_id: int) -> dict[str, Any]:
+    """Récupère une ligne d'écriture par son ID."""
+    return await client.get(f"/ledger_entry_lines/{line_id}")
+
+
+async def list_lettered_ledger_entry_lines(
+    client: PennylaneClient,
+    line_id: int,
+    limit: int = 20,
+    page: int = 1
+) -> dict[str, Any]:
+    """Liste les lignes d'écriture lettrées avec une ligne donnée."""
+    params = {
+        "per_page": limit,
+        "page": page,
+    }
+    
+    return await client.get(f"/ledger_entry_lines/{line_id}/lettered_ledger_entry_lines", params=params)
+
+
+async def list_ledger_entry_line_categories(
+    client: PennylaneClient,
+    line_id: int,
+    limit: int = 20,
+    page: int = 1
+) -> dict[str, Any]:
+    """Liste les catégories analytiques d'une ligne d'écriture."""
+    params = {
+        "per_page": limit,
+        "page": page,
+    }
+    
+    return await client.get(f"/ledger_entry_lines/{line_id}/categories", params=params)
+
+
+async def link_categories_to_ledger_entry_line(
+    client: PennylaneClient,
+    line_id: int,
+    categories: list[dict[str, Any]]
+) -> dict[str, Any]:
+    """Lie des catégories analytiques à une ligne d'écriture."""
+    data = {"categories": categories}
+    return await client.put(f"/ledger_entry_lines/{line_id}/categories", json=data)
+
+
+async def letter_ledger_entry_lines(
+    client: PennylaneClient,
+    ledger_entry_lines: list[dict[str, int]],
+    unbalanced_lettering_strategy: str = "none"
+) -> dict[str, Any]:
+    """Lettre des lignes d'écriture ensemble.
+    
+    Args:
+        ledger_entry_lines: Liste de lignes avec leur ID (min 2)
+        unbalanced_lettering_strategy: "none" ou "partial"
+    """
+    data = {
+        "unbalanced_lettering_strategy": unbalanced_lettering_strategy,
+        "ledger_entry_lines": ledger_entry_lines
+    }
+    
+    return await client.post("/ledger_entry_lines/lettering", json=data)
+
+
+async def unletter_ledger_entry_lines(
+    client: PennylaneClient,
+    ledger_entry_lines: list[dict[str, int]],
+    unbalanced_lettering_strategy: str = "none"
+) -> dict[str, Any]:
+    """Délettre des lignes d'écriture.
+    
+    Args:
+        ledger_entry_lines: Liste de lignes avec leur ID (min 1)
+        unbalanced_lettering_strategy: "none" ou "partial"
+    """
+    data = {
+        "unbalanced_lettering_strategy": unbalanced_lettering_strategy,
+        "ledger_entry_lines": ledger_entry_lines
+    }
+    
+    return await client.delete("/ledger_entry_lines/lettering", json=data)

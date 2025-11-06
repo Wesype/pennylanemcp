@@ -325,5 +325,92 @@ ALL_TOOLS = [
             },
             "required": ["ledger_entry_id"]
         }
+    },
+    # LIGNES D'ÉCRITURE COMPTABLE
+    {
+        "name": "pennylane_list_all_ledger_entry_lines",
+        "description": "Liste toutes les lignes d'écriture",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "limit": {"type": "integer", "description": "Nombre de résultats", "default": 20},
+                "cursor": {"type": "string", "description": "Curseur de pagination"},
+                "filter": {"type": "string", "description": "Filtres"},
+                "sort": {"type": "string", "description": "Tri", "default": "id"}
+            }
+        }
+    },
+    {
+        "name": "pennylane_get_ledger_entry_line",
+        "description": "Récupère une ligne d'écriture par son ID",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "line_id": {"type": "integer", "description": "ID de la ligne"}
+            },
+            "required": ["line_id"]
+        }
+    },
+    {
+        "name": "pennylane_list_lettered_ledger_entry_lines",
+        "description": "Liste les lignes lettrées avec une ligne donnée",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "line_id": {"type": "integer", "description": "ID de la ligne"},
+                "limit": {"type": "integer", "description": "Nombre de résultats", "default": 20},
+                "page": {"type": "integer", "description": "Numéro de page", "default": 1}
+            },
+            "required": ["line_id"]
+        }
+    },
+    {
+        "name": "pennylane_list_ledger_entry_line_categories",
+        "description": "Liste les catégories analytiques d'une ligne",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "line_id": {"type": "integer", "description": "ID de la ligne"},
+                "limit": {"type": "integer", "description": "Nombre de résultats", "default": 20},
+                "page": {"type": "integer", "description": "Numéro de page", "default": 1}
+            },
+            "required": ["line_id"]
+        }
+    },
+    {
+        "name": "pennylane_link_categories_to_ledger_entry_line",
+        "description": "Lie des catégories analytiques à une ligne",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "line_id": {"type": "integer", "description": "ID de la ligne"},
+                "categories": {"type": "array", "description": "Liste des catégories"}
+            },
+            "required": ["line_id", "categories"]
+        }
+    },
+    {
+        "name": "pennylane_letter_ledger_entry_lines",
+        "description": "Lettre des lignes d'écriture ensemble (min 2 lignes)",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "ledger_entry_lines": {"type": "array", "description": "Liste de lignes avec ID (min 2)"},
+                "unbalanced_lettering_strategy": {"type": "string", "description": "none ou partial", "default": "none"}
+            },
+            "required": ["ledger_entry_lines"]
+        }
+    },
+    {
+        "name": "pennylane_unletter_ledger_entry_lines",
+        "description": "Délettre des lignes d'écriture (min 1 ligne)",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "ledger_entry_lines": {"type": "array", "description": "Liste de lignes avec ID (min 1)"},
+                "unbalanced_lettering_strategy": {"type": "string", "description": "none ou partial", "default": "none"}
+            },
+            "required": ["ledger_entry_lines"]
+        }
     }
 ]
