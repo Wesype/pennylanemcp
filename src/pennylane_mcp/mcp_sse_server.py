@@ -52,21 +52,15 @@ async def sse_endpoint(request: Request):
     async def event_stream():
         """Generate SSE events for MCP protocol."""
         try:
-            # Get the base URL from request
-            base_url = str(request.base_url).rstrip('/')
+            # Get the base URL from request (use https for Railway)
+            base_url = str(request.base_url).rstrip('/').replace('http://', 'https://')
+            endpoint_url = f"{base_url}/message"
             
-            # Send endpoint event with full URL
-            endpoint_event = {
-                "jsonrpc": "2.0",
-                "method": "endpoint",
-                "params": {
-                    "endpoint": f"{base_url}/message"
-                }
-            }
+            # Send endpoint event - just the URL string
             yield f"event: endpoint\n"
-            yield f"data: {json.dumps(endpoint_event)}\n\n"
+            yield f"data: {endpoint_url}\n\n"
             
-            logger.info(f"SSE connection established, endpoint: {base_url}/message")
+            logger.info(f"SSE connection established, endpoint: {endpoint_url}")
             
             # Keep connection alive with heartbeat
             while True:
