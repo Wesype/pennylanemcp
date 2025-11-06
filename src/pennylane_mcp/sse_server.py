@@ -117,6 +117,29 @@ async def root():
     return {"status": "ok", "service": "Pennylane MCP SSE Server"}
 
 
+@app.get("/.well-known/mcp")
+async def mcp_discovery():
+    """MCP discovery endpoint for Dust."""
+    return {
+        "mcpServers": {
+            "pennylane": {
+                "url": "/sse",
+                "name": "Pennylane MCP",
+                "description": "Serveur MCP pour l'API Pennylane"
+            }
+        }
+    }
+
+
+@app.get("/.well-known/oauth-authorization-server")
+async def oauth_discovery():
+    """OAuth discovery - indicate no OAuth required."""
+    return {
+        "error": "oauth_not_supported",
+        "error_description": "This server does not require OAuth authentication"
+    }
+
+
 @app.get("/sse")
 async def sse_endpoint(request: Request):
     """SSE endpoint for MCP protocol."""
