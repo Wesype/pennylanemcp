@@ -52,15 +52,21 @@ async def sse_endpoint(request: Request):
     async def event_stream():
         """Generate SSE events for MCP protocol."""
         try:
-            # Send endpoint event
+            # Get the base URL from request
+            base_url = str(request.base_url).rstrip('/')
+            
+            # Send endpoint event with full URL
             endpoint_event = {
                 "jsonrpc": "2.0",
                 "method": "endpoint",
                 "params": {
-                    "endpoint": "/message"
+                    "endpoint": f"{base_url}/message"
                 }
             }
+            yield f"event: endpoint\n"
             yield f"data: {json.dumps(endpoint_event)}\n\n"
+            
+            logger.info(f"SSE connection established, endpoint: {base_url}/message")
             
             # Keep connection alive with heartbeat
             while True:
@@ -68,6 +74,7 @@ async def sse_endpoint(request: Request):
                     logger.info("Client disconnected from SSE")
                     break
                 await asyncio.sleep(30)
+                yield f": heartbeat\n\n"
                 
         except Exception as e:
             logger.error(f"SSE error: {e}")
