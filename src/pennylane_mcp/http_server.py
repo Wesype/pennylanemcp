@@ -2,7 +2,8 @@
 import os
 import json
 from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 import logging
 
 from .client import PennylaneClient
@@ -13,6 +14,15 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Pennylane MCP HTTP Server")
+
+# Ajouter CORS pour Dust
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Initialiser le client Pennylane
 api_key = os.getenv("PENNYLANE_API_KEY")
@@ -39,6 +49,27 @@ async def root():
 async def health():
     """Health check endpoint."""
     return {"status": "healthy"}
+
+
+@app.get("/api/tools")
+async def list_tools():
+    """Liste tous les outils disponibles."""
+    return {
+        "tools": [
+            {"name": "pennylane_list_customers", "description": "Liste tous les clients"},
+            {"name": "pennylane_get_customer", "description": "Récupère un client"},
+            {"name": "pennylane_list_customer_invoices", "description": "Liste toutes les factures clients"},
+            {"name": "pennylane_get_customer_invoice", "description": "Récupère une facture client"},
+            {"name": "pennylane_create_customer_invoice", "description": "Crée une facture client"},
+            {"name": "pennylane_list_quotes", "description": "Liste tous les devis"},
+            {"name": "pennylane_get_quote", "description": "Récupère un devis"},
+            {"name": "pennylane_create_quote", "description": "Crée un devis"},
+            {"name": "pennylane_update_quote", "description": "Met à jour un devis"},
+            {"name": "pennylane_update_quote_status", "description": "Met à jour le statut d'un devis"},
+            {"name": "pennylane_list_transactions", "description": "Liste toutes les transactions"},
+            {"name": "pennylane_list_bank_accounts", "description": "Liste tous les comptes bancaires"},
+        ]
+    }
 
 
 @app.post("/tools/{tool_name}")
