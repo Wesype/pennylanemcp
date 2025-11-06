@@ -8,8 +8,12 @@ COPY requirements.txt ./
 # Installer les dépendances
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copier le code source
+# Copier le code source et le script de démarrage
 COPY src/ ./src/
+COPY start.sh ./
+
+# Rendre le script exécutable
+RUN chmod +x start.sh
 
 # Ajouter src au PYTHONPATH
 ENV PYTHONPATH=/app/src
@@ -17,5 +21,5 @@ ENV PYTHONPATH=/app/src
 # Exposer le port (Railway assignera automatiquement un port)
 EXPOSE 8000
 
-# Commande pour démarrer le serveur HTTP (Railway utilisera $PORT)
-CMD uvicorn pennylane_mcp.http_server:app --host 0.0.0.0 --port ${PORT:-8000}
+# Commande pour démarrer le serveur HTTP
+CMD ["./start.sh"]
