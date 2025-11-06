@@ -265,5 +265,65 @@ ALL_TOOLS = [
             },
             "required": ["number", "label"]
         }
+    },
+    # ÉCRITURES COMPTABLES (LEDGER ENTRIES)
+    {
+        "name": "pennylane_list_ledger_entries",
+        "description": "Liste toutes les écritures comptables",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "limit": {"type": "integer", "description": "Nombre de résultats", "default": 20},
+                "page": {"type": "integer", "description": "Numéro de page", "default": 1},
+                "filter": {"type": "string", "description": "Filtres (updated_at, created_at, date, journal_id)"},
+                "sort": {"type": "string", "description": "Tri", "default": "-updated_at"}
+            }
+        }
+    },
+    {
+        "name": "pennylane_list_ledger_entry_lines",
+        "description": "Liste les lignes d'écriture d'une écriture comptable",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "ledger_entry_id": {"type": "integer", "description": "ID de l'écriture"},
+                "limit": {"type": "integer", "description": "Nombre de résultats", "default": 20},
+                "page": {"type": "integer", "description": "Numéro de page", "default": 1}
+            },
+            "required": ["ledger_entry_id"]
+        }
+    },
+    {
+        "name": "pennylane_create_ledger_entry",
+        "description": "Crée une nouvelle écriture comptable",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "date": {"type": "string", "description": "Date (YYYY-MM-DD)"},
+                "label": {"type": "string", "description": "Libellé"},
+                "journal_id": {"type": "integer", "description": "ID du journal"},
+                "ledger_entry_lines": {"type": "array", "description": "Lignes avec debit, credit, ledger_account_id, label"},
+                "ledger_attachment_id": {"type": "integer", "description": "ID pièce jointe"},
+                "currency": {"type": "string", "description": "Devise", "default": "EUR"}
+            },
+            "required": ["date", "label", "journal_id", "ledger_entry_lines"]
+        }
+    },
+    {
+        "name": "pennylane_update_ledger_entry",
+        "description": "Met à jour une écriture comptable",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "ledger_entry_id": {"type": "integer", "description": "ID de l'écriture"},
+                "date": {"type": "string", "description": "Date (YYYY-MM-DD)"},
+                "label": {"type": "string", "description": "Libellé"},
+                "journal_id": {"type": "integer", "description": "ID du journal"},
+                "ledger_entry_lines": {"type": "object", "description": "Dict avec create et update"},
+                "ledger_attachment_id": {"type": "integer", "description": "ID pièce jointe"},
+                "currency": {"type": "string", "description": "Devise"}
+            },
+            "required": ["ledger_entry_id"]
+        }
     }
 ]

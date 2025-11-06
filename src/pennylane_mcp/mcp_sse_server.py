@@ -226,6 +226,18 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> str:
         elif name == "pennylane_create_ledger_account":
             result = await journals.create_ledger_account(pennylane_client, **arguments)
         
+        # ÉCRITURES COMPTABLES
+        elif name == "pennylane_list_ledger_entries":
+            result = await journals.list_ledger_entries(pennylane_client, **arguments)
+        elif name == "pennylane_list_ledger_entry_lines":
+            result = await journals.list_ledger_entry_lines(pennylane_client, arguments["ledger_entry_id"], 
+                                                           limit=arguments.get("limit", 20), 
+                                                           page=arguments.get("page", 1))
+        elif name == "pennylane_create_ledger_entry":
+            result = await journals.create_ledger_entry(pennylane_client, **arguments)
+        elif name == "pennylane_update_ledger_entry":
+            result = await journals.update_ledger_entry(pennylane_client, **arguments)
+        
         else:
             return json.dumps({"error": f"Unknown tool: {name}"})
         

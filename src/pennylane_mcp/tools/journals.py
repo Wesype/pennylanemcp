@@ -104,3 +104,115 @@ async def create_ledger_account(
         data["country_alpha2"] = country_alpha2
     
     return await client.post("/ledger_accounts", json=data)
+
+
+async def list_ledger_entries(
+    client: PennylaneClient,
+    limit: int = 20,
+    page: int = 1,
+    filter_query: str | None = None,
+    sort: str = "-updated_at"
+) -> dict[str, Any]:
+    """Liste toutes les écritures comptables.
+    
+    Filtres disponibles:
+    - updated_at, created_at, date: lt, lteq, gt, gteq, eq, not_eq
+    - journal_id: lt, lteq, gt, gteq, eq, not_eq, in, not_in
+    """
+    params = {
+        "per_page": limit,
+        "page": page,
+        "sort": sort,
+    }
+    
+    if filter_query:
+        params["filter"] = filter_query
+    
+    return await client.get("/ledger_entries", params=params)
+
+
+async def list_ledger_entry_lines(
+    client: PennylaneClient,
+    ledger_entry_id: int,
+    limit: int = 20,
+    page: int = 1
+) -> dict[str, Any]:
+    """Liste les lignes d'écriture d'une écriture comptable."""
+    params = {
+        "per_page": limit,
+        "page": page,
+    }
+    
+    return await client.get(f"/ledger_entries/{ledger_entry_id}/ledger_entry_lines", params=params)
+
+
+async def create_ledger_entry(
+    client: PennylaneClient,
+    date: str,
+    label: str,
+    journal_id: int,
+    ledger_entry_lines: list[dict[str, Any]],
+    ledger_attachment_id: int | None = None,
+    currency: str = "EUR"
+) -> dict[str, Any]:
+    """Crée une nouvelle écriture comptable.
+    
+    Args:
+        date: Date de l'écriture (YYYY-MM-DD)
+        label: Libellé de l'écriture
+        journal_id: ID du journal
+        ledger_entry_lines: Lignes d'écriture avec debit, credit, ledger_account_id, label
+        ledger_attachment_id: ID de la pièce jointe
+        currency: Devise (ex: EUR)
+    """
+    data = {
+        "date": date,
+        "label": label,
+        "journal_id": journal_id,
+        "ledger_entry_lines": ledger_entry_lines,
+        "currency": currency
+    }
+    
+    if ledger_attachment_id:
+        data["ledger_attachment_id"] = ledger_attachment_id
+    
+    return await client.post("/ledger_entries", json=data)
+
+
+async def update_ledger_entry(
+    client: PennylaneClient,
+    ledger_entry_id: int,
+    date: str | None = None,
+    label: str | None = None,
+    journal_id: int | None = None,
+    ledger_entry_lines: dict[str, Any] | None = None,
+    ledger_attachment_id: int | None = None,
+    currency: str | None = None
+) -> dict[str, Any]:
+    """Met à jour une écriture comptable.
+    
+    Args:
+        ledger_entry_id: ID de l'écriture
+        date: Date de l'écriture (YYYY-MM-DD)
+        label: Libellé de l'écriture
+        journal_id: ID du journal
+        ledger_entry_lines: Dict avec "create" et "update" pour les lignes
+        ledger_attachment_id: ID de la pièce jointe
+        currency: Devise
+    """
+    data = {}
+    
+    if date:
+        data["date"] = date
+    if label:
+        data["label"] = label
+    if journal_id:
+        data["journal_id"] = journal_id
+    if ledger_entry_lines:
+        data["ledger_entry_lines"] = ledger_entry_lines
+    if ledger_attachment_id:
+        data["ledger_attachment_id"] = ledger_attachment_id
+    if currency:
+        data["currency"] = currency
+    
+    return await client.put(f"/ledger_entries/{ledger_entry_id}", json=data)
