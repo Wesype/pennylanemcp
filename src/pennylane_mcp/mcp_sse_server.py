@@ -9,7 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 
 from .client import PennylaneClient
-from .tools import invoices, customers, quotes, transactions, accounting
+from .tools import invoices, customers, quotes, transactions, accounting, suppliers
+from .all_tools_definition import ALL_TOOLS
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -93,7 +94,8 @@ async def handle_message(request: Request):
         params = body.get("params", {})
         msg_id = body.get("id")
         
-        logger.info(f"Received MCP message: {method}")
+        logger.info(f"Received MCP message: {method} (id: {msg_id})")
+        logger.debug(f"Full request body: {body}")
         
         if method == "initialize":
             return {
@@ -116,53 +118,7 @@ async def handle_message(request: Request):
                 "jsonrpc": "2.0",
                 "id": msg_id,
                 "result": {
-                    "tools": [
-                        {
-                            "name": "pennylane_list_customers",
-                            "description": "Liste tous les clients Pennylane",
-                            "inputSchema": {
-                                "type": "object",
-                                "properties": {
-                                    "limit": {"type": "integer", "description": "Nombre de résultats", "default": 20}
-                                }
-                            }
-                        },
-                        {
-                            "name": "pennylane_list_quotes",
-                            "description": "Liste tous les devis Pennylane",
-                            "inputSchema": {
-                                "type": "object",
-                                "properties": {
-                                    "limit": {"type": "integer", "description": "Nombre de résultats", "default": 30}
-                                }
-                            }
-                        },
-                        {
-                            "name": "pennylane_get_quote",
-                            "description": "Récupère un devis spécifique",
-                            "inputSchema": {
-                                "type": "object",
-                                "properties": {
-                                    "quote_id": {"type": "integer", "description": "ID du devis"}
-                                },
-                                "required": ["quote_id"]
-                            }
-                        },
-                        {
-                            "name": "pennylane_create_quote",
-                            "description": "Crée un nouveau devis",
-                            "inputSchema": {
-                                "type": "object",
-                                "properties": {
-                                    "customer_id": {"type": "integer"},
-                                    "date": {"type": "string"},
-                                    "deadline": {"type": "string"},
-                                    "invoice_lines": {"type": "array"}
-                                },
-                                "required": ["customer_id", "date", "deadline", "invoice_lines"]
-                            }
-                        }
-                    ]
+                    "tools": ALL_TOOLS
                 }
             }
         
@@ -210,33 +166,57 @@ async def handle_message(request: Request):
 async def call_tool(name: str, arguments: dict[str, Any]) -> str:
     """Execute a tool and return result as JSON string."""
     try:
-        if name == "pennylane_list_customers":
-            result = await customers.list_customers(
-                pennylane_client,
-                limit=arguments.get("limit", 20)
-            )
+        # FACTURES CLIENTS
+        if name == "pennylane_list_customer_invoices":
+            result = await invoices.list_customer_invoices(pennylane_client, **arguments)
+        elif name == "pennylane_get_customer_invoice":
+            result = await invoices.get_customer_invoice(pennylane_client, arguments["invoice_id"])
+        elif name == "pennylane_create_customer_invoice":
+            result = await invoices.create_customer_invoice(pennylane_client, **arguments)
+        
+        # CLIENTS
+        elif name == "pennylane_list_customers":
+            result = await customers.list_customers(pennylane_client, limit=arguments.get("limit", 20))
+        elif name == "pennylane_get_customer":
+            result = await customers.get_customer(pennylane_client, arguments["customer_id"])
+        elif name == "pennylane_create_customer":
+            result = await customers.create_customer(pennylane_client, **arguments)
+        
+        # DEVIS
         elif name == "pennylane_list_quotes":
-            result = await quotes.list_quotes(
-                pennylane_client,
-                limit=arguments.get("limit", 30)
-            )
+            result = await quotes.list_quotes(pennylane_client, limit=arguments.get("limit", 30))
         elif name == "pennylane_get_quote":
-            result = await quotes.get_quote(
-                pennylane_client,
-                arguments["quote_id"]
-            )
+            result = await quotes.get_quote(pennylane_client, arguments["quote_id"])
         elif name == "pennylane_create_quote":
-            result = await quotes.create_quote(
-                pennylane_client,
-                **arguments
-            )
+            result = await quotes.create_quote(pennylane_client, **arguments)
+        elif name == "pennylane_update_quote":
+            result = await quotes.update_quote(pennylane_client, **arguments)
+        elif name == "pennylane_update_quote_status":
+            result = await quotes.update_quote_status(pennylane_client, arguments["quote_id"], arguments["status"])
+        
+        # TRANSACTIONS
+        elif name == "pennylane_list_transactions":
+            result = await transactions.list_transactions(pennylane_client, limit=arguments.get("limit", 20))
+        elif name == "pennylane_create_transaction":
+            result = await transactions.create_transaction(pennylane_client, **arguments)
+        
+        # COMPTABILITÉ
+        elif name == "pennylane_list_bank_accounts":
+            result = await accounting.list_bank_accounts(pennylane_client)
+        
+        # FOURNISSEURS
+        elif name == "pennylane_list_suppliers":
+            result = await suppliers.list_suppliers(pennylane_client, limit=arguments.get("limit", 20))
+        elif name == "pennylane_create_supplier":
+            result = await suppliers.create_supplier(pennylane_client, **arguments)
+        
         else:
             return json.dumps({"error": f"Unknown tool: {name}"})
         
         return json.dumps(result, indent=2, ensure_ascii=False)
     
     except Exception as e:
-        logger.error(f"Error calling tool {name}: {e}")
+        logger.error(f"Error calling tool {name}: {e}", exc_info=True)
         return json.dumps({"error": str(e)})
 
 
