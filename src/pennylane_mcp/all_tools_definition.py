@@ -190,5 +190,42 @@ ALL_TOOLS = [
             },
             "required": ["name"]
         }
+    },
+    # JOURNAUX COMPTABLES
+    {
+        "name": "pennylane_list_journals",
+        "description": "Liste tous les journaux comptables",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "limit": {"type": "integer", "description": "Nombre de résultats", "default": 25},
+                "cursor": {"type": "string", "description": "Curseur de pagination"},
+                "filter": {"type": "string", "description": "Filtres (type: eq, not_eq, in, not_in)"},
+                "sort": {"type": "string", "description": "Tri", "default": "-id"}
+            }
+        }
+    },
+    {
+        "name": "pennylane_get_journal",
+        "description": "Récupère un journal comptable par son ID",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "journal_id": {"type": "integer", "description": "ID du journal"}
+            },
+            "required": ["journal_id"]
+        }
+    },
+    {
+        "name": "pennylane_create_journal",
+        "description": "Crée un nouveau journal comptable",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "code": {"type": "string", "description": "Code du journal (2 à 5 lettres)"},
+                "label": {"type": "string", "description": "Libellé du journal"}
+            },
+            "required": ["code", "label"]
+        }
     }
 ]

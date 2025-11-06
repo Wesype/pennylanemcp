@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 
 from .client import PennylaneClient
-from .tools import invoices, customers, quotes, transactions, accounting, suppliers
+from .tools import invoices, customers, quotes, transactions, accounting, suppliers, journals
 from .all_tools_definition import ALL_TOOLS
 
 logging.basicConfig(level=logging.INFO)
@@ -209,6 +209,14 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> str:
             result = await suppliers.list_suppliers(pennylane_client, limit=arguments.get("limit", 20))
         elif name == "pennylane_create_supplier":
             result = await suppliers.create_supplier(pennylane_client, **arguments)
+        
+        # JOURNAUX COMPTABLES
+        elif name == "pennylane_list_journals":
+            result = await journals.list_journals(pennylane_client, **arguments)
+        elif name == "pennylane_get_journal":
+            result = await journals.get_journal(pennylane_client, arguments["journal_id"])
+        elif name == "pennylane_create_journal":
+            result = await journals.create_journal(pennylane_client, arguments["code"], arguments["label"])
         
         else:
             return json.dumps({"error": f"Unknown tool: {name}"})
