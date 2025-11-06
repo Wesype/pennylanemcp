@@ -260,6 +260,14 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> str:
             result = await journals.unletter_ledger_entry_lines(pennylane_client, arguments["ledger_entry_lines"],
                                                                arguments.get("unbalanced_lettering_strategy", "none"))
         
+        # BALANCE ET EXERCICES FISCAUX
+        elif name == "pennylane_get_trial_balance":
+            result = await journals.get_trial_balance(pennylane_client, **arguments)
+        elif name == "pennylane_list_fiscal_years":
+            result = await journals.list_fiscal_years(pennylane_client, 
+                                                     limit=arguments.get("limit", 20),
+                                                     page=arguments.get("page", 1))
+        
         else:
             return json.dumps({"error": f"Unknown tool: {name}"})
         

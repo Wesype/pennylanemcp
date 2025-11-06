@@ -320,3 +320,45 @@ async def unletter_ledger_entry_lines(
     }
     
     return await client.delete("/ledger_entry_lines/lettering", json=data)
+
+
+async def get_trial_balance(
+    client: PennylaneClient,
+    period_start: str,
+    period_end: str,
+    is_auxiliary: bool = False,
+    limit: int = 20,
+    page: int = 1
+) -> dict[str, Any]:
+    """Récupère la balance générale.
+    
+    Args:
+        period_start: Date de début (YYYY-MM-DD)
+        period_end: Date de fin (YYYY-MM-DD)
+        is_auxiliary: Balance auxiliaire ou non
+        limit: Nombre de résultats
+        page: Numéro de page
+    """
+    params = {
+        "period_start": period_start,
+        "period_end": period_end,
+        "is_auxiliary": is_auxiliary,
+        "per_page": limit,
+        "page": page,
+    }
+    
+    return await client.get("/trial_balance", params=params)
+
+
+async def list_fiscal_years(
+    client: PennylaneClient,
+    limit: int = 20,
+    page: int = 1
+) -> dict[str, Any]:
+    """Liste les exercices fiscaux de l'entreprise."""
+    params = {
+        "per_page": limit,
+        "page": page,
+    }
+    
+    return await client.get("/fiscal_years", params=params)

@@ -412,5 +412,32 @@ ALL_TOOLS = [
             },
             "required": ["ledger_entry_lines"]
         }
+    },
+    # BALANCE GÉNÉRALE ET EXERCICES FISCAUX
+    {
+        "name": "pennylane_get_trial_balance",
+        "description": "Récupère la balance générale pour une période donnée",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "period_start": {"type": "string", "description": "Date de début (YYYY-MM-DD)"},
+                "period_end": {"type": "string", "description": "Date de fin (YYYY-MM-DD)"},
+                "is_auxiliary": {"type": "boolean", "description": "Balance auxiliaire", "default": False},
+                "limit": {"type": "integer", "description": "Nombre de résultats", "default": 20},
+                "page": {"type": "integer", "description": "Numéro de page", "default": 1}
+            },
+            "required": ["period_start", "period_end"]
+        }
+    },
+    {
+        "name": "pennylane_list_fiscal_years",
+        "description": "Liste les exercices fiscaux de l'entreprise",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "limit": {"type": "integer", "description": "Nombre de résultats", "default": 20},
+                "page": {"type": "integer", "description": "Numéro de page", "default": 1}
+            }
+        }
     }
 ]
