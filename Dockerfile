@@ -17,5 +17,5 @@ ENV PYTHONPATH=/app/src
 # Exposer le port (Railway assignera automatiquement un port)
 EXPOSE 8000
 
-# Commande pour démarrer le serveur HTTP
-CMD ["uvicorn", "pennylane_mcp.http_server:app", "--host", "0.0.0.0", "--port", "8000"]
+# Commande pour démarrer le serveur HTTP (Railway utilisera $PORT)
+CMD uvicorn pennylane_mcp.http_server:app --host 0.0.0.0 --port ${PORT:-8000}
