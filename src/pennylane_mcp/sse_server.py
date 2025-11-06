@@ -124,21 +124,39 @@ async def sse_endpoint(request: Request):
     async def event_generator():
         """Generate SSE events."""
         try:
-            # Envoyer l'initialisation
-            yield {
-                "event": "message",
-                "data": json.dumps({
-                    "jsonrpc": "2.0",
-                    "method": "initialized",
-                    "params": {}
-                })
+            # Envoyer les informations du serveur
+            server_info = {
+                "jsonrpc": "2.0",
+                "method": "notifications/initialized",
+                "params": {
+                    "protocolVersion": "2024-11-05",
+                    "capabilities": {
+                        "tools": {}
+                    },
+                    "serverInfo": {
+                        "name": "pennylane-mcp",
+                        "version": "1.0.0"
+                    }
+                }
             }
             
-            # Garder la connexion ouverte
+            yield {
+                "event": "message",
+                "data": json.dumps(server_info)
+            }
+            
+            # Envoyer un ping régulier pour garder la connexion
             while True:
                 if await request.is_disconnected():
+                    logger.info("Client disconnected")
                     break
-                await asyncio.sleep(1)
+                
+                # Ping toutes les 30 secondes
+                await asyncio.sleep(30)
+                yield {
+                    "event": "ping",
+                    "data": json.dumps({"type": "ping"})
+                }
                 
         except Exception as e:
             logger.error(f"SSE error: {e}")
