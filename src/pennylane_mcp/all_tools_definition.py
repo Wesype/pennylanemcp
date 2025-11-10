@@ -49,7 +49,23 @@ ALL_TOOLS = [
                             "description": {"type": "string", "description": "Description détaillée (optionnel)"},
                             "section_rank": {"type": "integer", "description": "Rang de section (optionnel)"},
                             "ledger_account_id": {"type": "integer", "description": "ID compte général (optionnel)"},
-                            "product_id": {"type": "integer", "description": "ID produit (optionnel)"}
+                            "product_id": {"type": "integer", "description": "ID produit (optionnel)"},
+                            "discount": {
+                                "type": "object",
+                                "description": "Remise sur la ligne (optionnel)",
+                                "properties": {
+                                    "type": {"type": "string", "description": "Type: 'absolute' ou 'relative'"},
+                                    "value": {"type": "string", "description": "Valeur de la remise"}
+                                }
+                            },
+                            "imputation_dates": {
+                                "type": "object",
+                                "description": "Période d'imputation (optionnel)",
+                                "properties": {
+                                    "start_date": {"type": "string", "description": "Date de début (YYYY-MM-DD)"},
+                                    "end_date": {"type": "string", "description": "Date de fin (YYYY-MM-DD)"}
+                                }
+                            }
                         },
                         "required": ["label", "raw_currency_unit_price", "quantity", "unit", "vat_rate"]
                     }
@@ -57,11 +73,21 @@ ALL_TOOLS = [
                 "draft": {"type": "boolean", "description": "true = brouillon modifiable, false = facture finalisée", "default": True},
                 "currency": {"type": "string", "description": "Devise (EUR, USD, etc.)", "default": "EUR"},
                 "language": {"type": "string", "description": "Langue (fr_FR, en_GB)", "default": "fr_FR"},
+                "customer_invoice_template_id": {"type": "integer", "description": "ID du template de facture (optionnel)"},
                 "pdf_invoice_subject": {"type": "string", "description": "Titre de la facture (optionnel)"},
                 "pdf_description": {"type": "string", "description": "Description de la facture (optionnel)"},
                 "pdf_invoice_free_text": {"type": "string", "description": "Texte libre (coordonnées contact, etc.) (optionnel)"},
                 "special_mention": {"type": "string", "description": "Mentions spéciales (optionnel)"},
                 "external_reference": {"type": "string", "description": "Référence externe unique (optionnel)"},
+                "transaction_reference": {
+                    "type": "object",
+                    "description": "Référence de transaction pour réconciliation automatique (optionnel)",
+                    "properties": {
+                        "banking_provider": {"type": "string", "description": "Fournisseur bancaire"},
+                        "provider_field_name": {"type": "string", "description": "Nom du champ à matcher"},
+                        "provider_field_value": {"type": "string", "description": "Valeur à matcher"}
+                    }
+                },
                 "discount": {
                     "type": "object",
                     "description": "Remise globale (optionnel)",
