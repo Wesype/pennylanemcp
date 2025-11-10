@@ -28,15 +28,60 @@ ALL_TOOLS = [
     },
     {
         "name": "pennylane_create_customer_invoice",
-        "description": "Crée une nouvelle facture client",
+        "description": "Crée une nouvelle facture client (brouillon ou finalisée)",
         "inputSchema": {
             "type": "object",
             "properties": {
                 "customer_id": {"type": "integer", "description": "ID du client"},
-                "date": {"type": "string", "description": "Date (YYYY-MM-DD)"},
-                "deadline": {"type": "string", "description": "Date limite (YYYY-MM-DD)"},
-                "invoice_lines": {"type": "array", "description": "Lignes de facture"},
-                "draft": {"type": "boolean", "description": "Brouillon ou finalisée", "default": True}
+                "date": {"type": "string", "description": "Date de facture (YYYY-MM-DD)"},
+                "deadline": {"type": "string", "description": "Date limite de paiement (YYYY-MM-DD)"},
+                "invoice_lines": {
+                    "type": "array",
+                    "description": "Lignes de facture. Chaque ligne doit contenir: label (string), raw_currency_unit_price (string, ex: '750.00'), quantity (number), unit (string, ex: 'jour'), vat_rate (string, ex: 'FR_200' pour 20%)",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "label": {"type": "string", "description": "Libellé de la ligne"},
+                            "raw_currency_unit_price": {"type": "string", "description": "Prix unitaire HT (ex: '750.00')"},
+                            "quantity": {"type": "number", "description": "Quantité"},
+                            "unit": {"type": "string", "description": "Unité (ex: 'jour', 'unité')"},
+                            "vat_rate": {"type": "string", "description": "Taux TVA (ex: 'FR_200' pour 20%, 'FR_100' pour 10%)"},
+                            "description": {"type": "string", "description": "Description détaillée (optionnel)"},
+                            "section_rank": {"type": "integer", "description": "Rang de section (optionnel)"},
+                            "ledger_account_id": {"type": "integer", "description": "ID compte général (optionnel)"},
+                            "product_id": {"type": "integer", "description": "ID produit (optionnel)"}
+                        },
+                        "required": ["label", "raw_currency_unit_price", "quantity", "unit", "vat_rate"]
+                    }
+                },
+                "draft": {"type": "boolean", "description": "true = brouillon modifiable, false = facture finalisée", "default": True},
+                "currency": {"type": "string", "description": "Devise (EUR, USD, etc.)", "default": "EUR"},
+                "language": {"type": "string", "description": "Langue (fr_FR, en_GB)", "default": "fr_FR"},
+                "pdf_invoice_subject": {"type": "string", "description": "Titre de la facture (optionnel)"},
+                "pdf_description": {"type": "string", "description": "Description de la facture (optionnel)"},
+                "pdf_invoice_free_text": {"type": "string", "description": "Texte libre (coordonnées contact, etc.) (optionnel)"},
+                "special_mention": {"type": "string", "description": "Mentions spéciales (optionnel)"},
+                "external_reference": {"type": "string", "description": "Référence externe unique (optionnel)"},
+                "discount": {
+                    "type": "object",
+                    "description": "Remise globale (optionnel)",
+                    "properties": {
+                        "type": {"type": "string", "description": "Type: 'absolute' (montant) ou 'relative' (pourcentage)"},
+                        "value": {"type": "string", "description": "Valeur de la remise"}
+                    }
+                },
+                "invoice_line_sections": {
+                    "type": "array",
+                    "description": "Sections de lignes (optionnel)",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "title": {"type": "string"},
+                            "description": {"type": "string"},
+                            "rank": {"type": "integer"}
+                        }
+                    }
+                }
             },
             "required": ["customer_id", "date", "deadline", "invoice_lines", "draft"]
         }
